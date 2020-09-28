@@ -1,12 +1,16 @@
 local wibox = require("wibox")
 local gears = require("gears")
 local naughty = require("naughty")
+local awful = require("awful")
 
 local buttons = {}
 
 buttons.with_icon = function(args)
     local type = args.type or 'basic'
+    local size = args.size or 20
+    local margins = args.margins or 8
     local color = args.color or '#D8DEE9'
+    local border = args.border or 1
     local icon = args.icon or 'help-circle'
     local shape = args.shape or 'circle'
     local onclick = args.onclick or function () end
@@ -20,11 +24,11 @@ buttons.with_icon = function(args)
             {
                 image = icon,
                 resize = true,
-                forced_height = 20,
-                forced_width = 20,
+                forced_height = size,
+                forced_width = size,
                 widget = wibox.widget.imagebox
             },
-            margins = 8,
+            margins = margins,
             widget = wibox.container.margin
         },
         bg = '#00000000',
@@ -33,7 +37,7 @@ buttons.with_icon = function(args)
 
     if type == 'outline' then
         result:set_shape_border_color(color)
-        result:set_shape_border_width(1)
+        result:set_shape_border_width(border)
     elseif type == 'flat' then
         result:set_bg(color)
     end
@@ -65,8 +69,14 @@ buttons.with_icon = function(args)
         end
     end)
 
-    result:connect_signal("button::press", function() onclick() end)
-
+    result:connect_signal("button::press", function() 
+        onclick() 
+        if args.restart == 1 then
+            awesome.restart() 
+        end
+     end
+    )
+        
     return result
 end
 
@@ -119,7 +129,7 @@ buttons.with_text = function(args)
         end
     end)
 
-    result:connect_signal("button::press", function() onclick() end)
+    result:connect_signal("button::press", function() awful.spawn.with_shell(onclick) end)
 
     return result
 end
